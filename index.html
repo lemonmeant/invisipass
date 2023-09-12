@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAAMUlEQVR4nGNsEVNiIAWwcPxjJFHDf1I1/GOisQ2cNLeB9n4g2QbOYeAH0mP6P2k2AAA0IxB1KnaJDQAAAABJRU5ErkJggg=="/>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvisiPass</title>
+    <style>
+body {
+    font-family: Arial, sans-serif;
+    background-color: #FFFFFF; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    transition: background-color 0.5s; 
+}
+
+.container {
+    background-color: #FEEEF0; 
+    padding: 40px;
+    border-radius: 15px; 
+    box-shadow: 0px 8px 28px rgba(65, 00, 00, 0.6); 
+    transform: scale(1); 
+    transition: transform 0.3s; 
+    width: 80%;
+    max-width: 520px; 
+}
+
+.container:hover {
+    transform: scale(1.03); 
+}
+
+h1 {
+    text-align: center;
+    animation: fadeInDown 1.2s; 
+    margin-bottom: 30px; 
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-40px); 
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+label {
+    display: block;
+    margin: 18px 0; 
+    animation: fadeIn 1.2s; 
+    font-weight: 600; 
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+input[type="text"], input[type="number"] { 
+    
+    padding: 10px;
+    border: 1px solid #bba0b9; 
+    border-radius: 5px; 
+    width: 100%; 
+    box-sizing: border-box; 
+    margin-bottom: 15px; 
+    font-size: 1rem; 
+}
+
+button {
+    margin-top: 28px; 
+    padding: 12px 20px; 
+    border: none;
+    border-radius: 8px; 
+    background-color: #FEEEF0; 
+    color: white;
+    cursor: pointer;
+    transform: scale(1); 
+    transition: transform 0.25s, background-color 0.35s; 
+    font-weight: 650; 
+    display: block;
+    width: 100%; 
+}
+
+button:hover {
+    background-color: #DAD2E0;
+    transform: scale(1.03); 
+}
+
+    
+body {
+    font-weight: bold;
+}
+.container {
+    border: 3px solid #FEEEF0;
+}
+button, input[type="submit"], input[type="button"] {
+    background-color: #8B0000;
+    color: #FEEEF0;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 2px 2px 10px rgba(65, 00, 00, 0.6);
+    font-weight: bold;
+    cursor: pointer;
+}
+button:hover, input[type="submit"]:hover, input[type="button"]:hover {
+    background-color: #DC143C;
+}
+
+body {
+    line-height: 1.6;
+}
+
+.container {
+    margin: 20px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+p, li, a {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+a {
+    text-decoration: none;
+    color: #DC143C;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+button, input[type="submit"], input[type="button"] {
+    font-size: 16px;
+}
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1>InvisiPass</h1>
+        <label for="length">Password Length:</label>
+        <input type="number" id="length" min="1" value="25">
+        <button id="generate">Generate</button>
+        <div class="output">
+            <label for="password">Password:</label>
+            <input type="text" id="password" readonly>
+            <label for="passwordID">Password ID:</label>
+            <input type="text" id="passwordID" readonly>
+        </div>
+        <button id="copy">Copy to Clipboard</button>
+    </div>
+    <script>
+
+const symbols = [
+    '\u00AD', '\u034F', '\u061C', '\u115F', '\u1160',
+    '\u17B4', '\u17B5', '\u180E', '\u200B', '\u200C',
+    '\u200D', '\u200E', '\u200F', '\u2060', '\u2061', '\u2062',
+    '\u2064', '\u206A', '\u206B', '\u206C', '\u206D', '\u206E', '\u206F',
+    '\u2800', '\u3164', '\uFEFF', '\uFFA0'
+];
+
+
+
+function generatePassword(length) {
+    let password = '';
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * symbols.length);
+        password += symbols[randomIndex];
+    }
+    return password;
+}
+
+async function calculatePasswordID(password) {
+    const msgUint8 = new TextEncoder().encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+}
+
+document.getElementById('generate').addEventListener('click', async function() {
+    const length = parseInt(document.getElementById('length').value);
+    const password = generatePassword(length);
+    const passwordID = await calculatePasswordID(password);
+    
+    document.getElementById('password').value = password;
+    document.getElementById('passwordID').value = passwordID;
+});
+
+document.getElementById('copy').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    
+    passwordInput.select();
+    passwordInput.setSelectionRange(0, 99999); 
+
+    document.execCommand('copy');
+
+    alert('Password copied to clipboard!');
+});
+
+
+    </script>
+</body>
+</html>
+
